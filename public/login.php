@@ -50,7 +50,7 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST') 
 
             // Assuming the linking column is researcher_id in both tables
             $stmt_type = $conn->prepare("SELECT * FROM $type_table WHERE researcher_id = ?");
-            $stmt_type->bind_param("i", $researcher_id);
+            $stmt_type->bind_param("s", $researcher_id);
             $stmt_type->execute();
             $result_type = $stmt_type->get_result();
 

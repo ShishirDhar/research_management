@@ -10,9 +10,19 @@ if ($_SESSION['user_type'] == 'student') {
     exit();
 }
 
-// Fetch all projects
-$query = "SELECT * FROM project";
-$result = $conn->query($query);
+// Fetch projects based on user role
+if ($_SESSION['user_type'] == 'faculty') {
+    $uid = $_SESSION['uid'];
+    // Filter projects where the faculty is the lead
+    $stmt = $conn->prepare("SELECT * FROM project WHERE project_lead = ?");
+    $stmt->bind_param("s", $uid);
+    $stmt->execute();
+    $result = $stmt->get_result();
+} else {
+    // Admin sees all projects
+    $query = "SELECT * FROM project";
+    $result = $conn->query($query);
+}
 ?>
 
 <!DOCTYPE html>
@@ -37,6 +47,7 @@ $result = $conn->query($query);
                 <th>Status</th>
                 <th>Start Date</th>
                 <th>End Date</th>
+                <th>Team Members</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -51,6 +62,21 @@ $result = $conn->query($query);
                         <td><?php echo htmlspecialchars($row['start_date']); ?></td>
                         <td><?php echo htmlspecialchars($row['end_date']); ?></td>
                         <td>
+                            <?php
+                            $pid = $row['project_id'];
+                            $tm_query = "SELECT r.f_name, r.l_name, rp.role FROM researcher_project rp JOIN researcher r ON rp.researcher_id = r.researcher_id WHERE rp.project_id = ?";
+                            $stmt_tm = $conn->prepare($tm_query);
+                            $stmt_tm->bind_param("s", $pid);
+                            $stmt_tm->execute();
+                            $res_tm = $stmt_tm->get_result();
+                            $members = [];
+                            while ($tm = $res_tm->fetch_assoc()) {
+                                $members[] = htmlspecialchars($tm['f_name'] . ' ' . $tm['l_name'] . ' (' . $tm['role'] . ')');
+                            }
+                            echo implode(', ', $members);
+                            ?>
+                        </td>
+                        <td>
                             <a href="edit.php?id=<?php echo $row['project_id']; ?>">Edit</a> |
                             <a href="delete.php?id=<?php echo $row['project_id']; ?>"
                                 onclick="return confirm('Are you sure?')">Delete</a>
@@ -59,7 +85,7 @@ $result = $conn->query($query);
                 <?php endwhile; ?>
             <?php else: ?>
                 <tr>
-                    <td colspan="7">No projects found.</td>
+                    <td colspan="8">No projects found.</td>
                 </tr>
             <?php endif; ?>
         </tbody>

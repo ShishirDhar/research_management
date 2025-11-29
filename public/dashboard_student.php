@@ -42,8 +42,51 @@ $total_funding_left = $total_funding_left_result->fetch_assoc()['s'];
         <li><strong>Total Funding Left:</strong> <?php echo number_format($total_funding_left, 2); ?> BDT</li>
     </ul>
 
+    <h3>My Project Tasks</h3>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Task Name</th>
+                <th>Project</th>
+                <th>Status</th>
+                <th>Due Date</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+            $uid = $_SESSION['uid'];
+            $tasks_query = "SELECT pt.*, p.project_title 
+                            FROM project_task pt 
+                            JOIN researcher_project rp ON pt.project_id = rp.project_id 
+                            JOIN project p ON pt.project_id = p.project_id
+                            WHERE rp.researcher_id = ?";
+            $stmt_tasks = $conn->prepare($tasks_query);
+            $stmt_tasks->bind_param("s", $uid);
+            $stmt_tasks->execute();
+            $tasks_result = $stmt_tasks->get_result();
+
+            if ($tasks_result->num_rows > 0):
+                while ($task = $tasks_result->fetch_assoc()): ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($task['task_name']); ?></td>
+                        <td><?php echo htmlspecialchars($task['project_title']); ?></td>
+                        <td><?php echo htmlspecialchars($task['task_status']); ?></td>
+                        <td><?php echo htmlspecialchars($task['due_date']); ?></td>
+                        <td><?php echo htmlspecialchars($task['task_description']); ?></td>
+                    </tr>
+                <?php endwhile;
+            else: ?>
+                <tr>
+                    <td colspan="5">No tasks found.</td>
+                </tr>
+            <?php endif; ?>
+        </tbody>
+    </table>
+
     <h3>Quick Links</h3>
     <ul>
+        <li><a href="/research_management/public/profile.php">My Profile</a></li>
         <li><a href="/research_management/modules/researchers/list.php">Researchers</a></li>
         <li><a href="/research_management/modules/projects/list.php">Projects</a></li>
         <li><a href="/research_management/modules/publications/list.php">Publications</a></li>
