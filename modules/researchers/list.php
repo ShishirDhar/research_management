@@ -69,7 +69,13 @@ $result = $conn->query($query);
         </tbody>
     </table>
     <br>
-    <a href="/research_management/public/dashboard.php">Back to Dashboard</a>
+    <?php
+    $dashboard_url = '/research_management/public/dashboard.php';
+    if ($_SESSION['user_type'] == 'faculty') {
+        $dashboard_url = '/research_management/public/dashboard_faculty.php';
+    }
+    ?>
+    <a href="<?php echo $dashboard_url; ?>">Back to Dashboard</a>
 </body>
 
 </html>

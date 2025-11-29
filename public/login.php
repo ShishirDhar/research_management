@@ -92,7 +92,7 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST') 
         <h2>Welcome Back</h2>
         <p>Please login to your account</p>
 
-        <?php if (isset($error)): ?>
+        <?php if (!empty($error)): ?>
             <div class="error-message">
                 <?php echo htmlspecialchars($error); ?>
             </div>
