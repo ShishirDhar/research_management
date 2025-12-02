@@ -84,51 +84,58 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST') 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Research Management</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=<?php echo time(); ?>">
 </head>
 
 <body>
     <div class="login-container">
-        <h2>Welcome Back</h2>
-        <p>Please login to your account</p>
+        <div class="login-left">
+            <h1>Research<br>Management<br>System</h1>
+            <p>Empowering academic excellence through streamlined project and grant management.</p>
+        </div>
+        <div class="login-right">
+            <h2>Welcome Back</h2>
+            <p>Please login to your account</p>
 
-        <?php if (!empty($error)): ?>
-            <div class="error-message">
-                <?php echo htmlspecialchars($error); ?>
-            </div>
-        <?php endif; ?>
+            <?php if (!empty($error)): ?>
+                <div class="error-message">
+                    <?php echo htmlspecialchars($error); ?>
+                </div>
+            <?php endif; ?>
 
-        <form action="login.php" method="POST">
-            <div class="form-group">
-                <label for="username">Email / Username</label>
-                <input type="text" id="username" name="username" placeholder="Enter your email or username" required>
-            </div>
+            <form action="login.php" method="POST">
+                <div class="form-group">
+                    <label for="username">Email / Username</label>
+                    <input type="text" id="username" name="username" placeholder="Enter your email or username"
+                        required>
+                </div>
 
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="Enter your password" required>
-            </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                </div>
 
-            <div class="form-group">
-                <label>Select Role</label>
-                <div class="role-selection">
-                    <div class="role-option">
-                        <input type="radio" id="admin" name="user_type" value="admin" checked>
-                        <label for="admin">Admin</label>
-                    </div>
-                    <div class="role-option">
-                        <input type="radio" id="student" name="user_type" value="student">
-                        <label for="student">Student</label>
-                    </div>
-                    <div class="role-option">
-                        <input type="radio" id="faculty" name="user_type" value="faculty">
-                        <label for="faculty">Faculty</label>
+                <div class="form-group">
+                    <label>Select Role</label>
+                    <div class="role-selection">
+                        <div class="role-option">
+                            <input type="radio" id="admin" name="user_type" value="admin" checked>
+                            <label for="admin">Admin</label>
+                        </div>
+                        <div class="role-option">
+                            <input type="radio" id="student" name="user_type" value="student">
+                            <label for="student">Student</label>
+                        </div>
+                        <div class="role-option">
+                            <input type="radio" id="faculty" name="user_type" value="faculty">
+                            <label for="faculty">Faculty</label>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <button type="submit" class="btn-login">Login</button>
-        </form>
+                <button type="submit" class="btn-login">Login</button>
+            </form>
+        </div>
     </div>
 </body>
 

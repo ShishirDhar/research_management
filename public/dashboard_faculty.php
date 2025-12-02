@@ -95,7 +95,7 @@ $total_funding_left = $total_funding_left_result->fetch_assoc()['s'];
     <h3>Quick Links</h3>
     <ul>
         <li><a href="/research_management/public/profile.php">My Profile</a></li>
-        <li><a href="/research_management/modules/researchers/list.php">Manage Researchers</a></li>
+        <li><a href="/research_management/modules/researchers/list.php">Researchers</a></li>
         <li><a href="/research_management/modules/projects/list.php">Projects</a></li>
         <li><a href="/research_management/modules/publications/list.php">Publications</a></li>
     </ul>
