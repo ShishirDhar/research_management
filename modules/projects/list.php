@@ -4,24 +4,21 @@ require_once __DIR__ . '/../../lib/auth.php';
 
 require_login();
 
-// Access Control: Admin and Faculty Only
-if ($_SESSION['user_type'] == 'student') {
-    header("Location: /research_management/public/dashboard_student.php");
-    exit();
-}
-
 // Fetch projects based on user role
-if ($_SESSION['user_type'] == 'faculty') {
-    $uid = $_SESSION['uid'];
-    // Filter projects where the faculty is the lead
-    $stmt = $conn->prepare("SELECT * FROM project WHERE project_lead = ?");
-    $stmt->bind_param("s", $uid);
-    $stmt->execute();
-    $result = $stmt->get_result();
-} else {
-    // Admin sees all projects
+if ($_SESSION['user_type'] == 'admin') {
     $query = "SELECT * FROM project";
     $result = $conn->query($query);
+} else {
+    // Faculty and Students see projects they lead OR are members of
+    $uid = $_SESSION['uid'];
+    $query = "SELECT DISTINCT p.* 
+              FROM project p 
+              LEFT JOIN researcher_project rp ON p.project_id = rp.project_id 
+              WHERE p.project_lead = ? OR rp.researcher_id = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("ss", $uid, $uid);
+    $stmt->execute();
+    $result = $stmt->get_result();
 }
 ?>
 
@@ -36,8 +33,10 @@ if ($_SESSION['user_type'] == 'faculty') {
 
 <body>
     <h1>Projects</h1>
-    <a href="add.php">Add New Project</a>
-    <br><br>
+    <?php if ($_SESSION['user_type'] != 'student'): ?>
+        <a href="add.php">Add New Project</a>
+        <br><br>
+    <?php endif; ?>
     <table border="1">
         <thead>
             <tr>
@@ -48,7 +47,9 @@ if ($_SESSION['user_type'] == 'faculty') {
                 <th>Start Date</th>
                 <th>End Date</th>
                 <th>Team Members</th>
-                <th>Actions</th>
+                <?php if ($_SESSION['user_type'] != 'student'): ?>
+                    <th>Actions</th>
+                <?php endif; ?>
             </tr>
         </thead>
         <tbody>
@@ -76,16 +77,18 @@ if ($_SESSION['user_type'] == 'faculty') {
                             echo implode(', ', $members);
                             ?>
                         </td>
-                        <td>
-                            <a href="edit.php?id=<?php echo $row['project_id']; ?>">Edit</a> |
-                            <a href="delete.php?id=<?php echo $row['project_id']; ?>"
-                                onclick="return confirm('Are you sure?')">Delete</a>
-                        </td>
+                        <?php if ($_SESSION['user_type'] != 'student'): ?>
+                            <td>
+                                <a href="edit.php?id=<?php echo $row['project_id']; ?>">Edit</a> |
+                                <a href="delete.php?id=<?php echo $row['project_id']; ?>"
+                                    onclick="return confirm('Are you sure?')">Delete</a>
+                            </td>
+                        <?php endif; ?>
                     </tr>
                 <?php endwhile; ?>
             <?php else: ?>
                 <tr>
-                    <td colspan="8">No projects found.</td>
+                    <td colspan="<?php echo ($_SESSION['user_type'] != 'student') ? 8 : 7; ?>">No projects found.</td>
                 </tr>
             <?php endif; ?>
         </tbody>
@@ -95,6 +98,8 @@ if ($_SESSION['user_type'] == 'faculty') {
     $dashboard_url = '/research_management/public/dashboard.php';
     if ($_SESSION['user_type'] == 'faculty') {
         $dashboard_url = '/research_management/public/dashboard_faculty.php';
+    } elseif ($_SESSION['user_type'] == 'student') {
+        $dashboard_url = '/research_management/public/dashboard_student.php';
     }
     ?>
     <a href="<?php echo $dashboard_url; ?>">Back to Dashboard</a>

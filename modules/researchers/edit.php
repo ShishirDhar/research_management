@@ -96,21 +96,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt_s->execute();
         } else if ($type == 'faculty') {
             $experience = $_POST['experience'];
-            $stmt_f = $conn->prepare("UPDATE faculty SET experience=? WHERE researcher_id=?");
-            $stmt_f->bind_param("is", $experience, $id);
+            $initials = $_POST['initials'];
+            $stmt_f = $conn->prepare("UPDATE faculty SET experience=?, initials=? WHERE researcher_id=?");
+            $stmt_f->bind_param("iss", $experience, $initials, $id);
             $stmt_f->execute();
         }
 
         // Update Contact
-        // Check if exists first
-        $stmt_check_contact = $conn->prepare("SELECT * FROM researcher_contact WHERE researcher_id = ?");
-        $stmt_check_contact->bind_param("s", $id);
-        $stmt_check_contact->execute();
-        if ($stmt_check_contact->get_result()->num_rows > 0) {
-            $stmt_c = $conn->prepare("UPDATE researcher_contact SET contact_no=? WHERE researcher_id=?");
-            $stmt_c->bind_param("ss", $contact_no, $id);
-            $stmt_c->execute();
-        } else if (!empty($contact_no)) {
+        // Strategy: Delete existing and insert new to avoid primary key conflicts
+        $stmt_del_contact = $conn->prepare("DELETE FROM researcher_contact WHERE researcher_id = ?");
+        $stmt_del_contact->bind_param("s", $id);
+        $stmt_del_contact->execute();
+
+        if (!empty($contact_no)) {
             $stmt_c = $conn->prepare("INSERT INTO researcher_contact (researcher_id, contact_no) VALUES (?, ?)");
             $stmt_c->bind_param("ss", $id, $contact_no);
             $stmt_c->execute();
@@ -184,6 +182,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php elseif ($type == 'faculty'): ?>
             <label>Experience (Years):</label> <input type="number" name="experience"
                 value="<?php echo htmlspecialchars($faculty_data['experience']); ?>" required><br><br>
+            <label>Initials:</label> <input type="text" name="initials"
+                value="<?php echo htmlspecialchars($faculty_data['initials'] ?? ''); ?>"><br><br>
         <?php endif; ?>
 
         <button type="submit">Update Researcher</button>

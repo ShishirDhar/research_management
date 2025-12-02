@@ -4,14 +4,13 @@ require_once __DIR__ . '/../../lib/auth.php';
 
 require_login();
 
-// Access Control: Only Admin and Faculty
-if ($_SESSION['user_type'] == 'student') {
-    header("Location: /research_management/public/dashboard_student.php");
-    exit();
-}
+// Access Control: Allow Admin, Faculty, and Student (Read-Only for non-Admin)
+// Previously redirected students, now allowing them.
 
-// Fetch all researchers
-$query = "SELECT * FROM researcher";
+// Fetch all researchers with profile info
+$query = "SELECT r.*, rp.biography, rp.research_interests 
+          FROM researcher r 
+          LEFT JOIN researcher_profile rp ON r.researcher_id = rp.researcher_id";
 $result = $conn->query($query);
 ?>
 
@@ -21,11 +20,11 @@ $result = $conn->query($query);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Researchers</title>
+    <title>Researchers</title>
 </head>
 
 <body>
-    <h1>Manage Researchers</h1>
+    <h1>Researchers</h1>
     <?php if ($_SESSION['user_type'] == 'admin'): ?>
         <a href="add.php">Add New Researcher</a>
         <br><br>
@@ -38,6 +37,8 @@ $result = $conn->query($query);
                 <th>Last Name</th>
                 <th>Email</th>
                 <th>Department</th>
+                <th>Biography</th>
+                <th>Research Interests</th>
                 <?php if ($_SESSION['user_type'] == 'admin'): ?>
                     <th>Actions</th>
                 <?php endif; ?>
@@ -52,6 +53,8 @@ $result = $conn->query($query);
                         <td><?php echo htmlspecialchars($row['l_name']); ?></td>
                         <td><?php echo htmlspecialchars($row['email']); ?></td>
                         <td><?php echo htmlspecialchars($row['department']); ?></td>
+                        <td><?php echo htmlspecialchars($row['biography'] ?? ''); ?></td>
+                        <td><?php echo htmlspecialchars($row['research_interests'] ?? ''); ?></td>
                         <?php if ($_SESSION['user_type'] == 'admin'): ?>
                             <td>
                                 <a href="edit.php?id=<?php echo $row['researcher_id']; ?>">Edit</a> |
@@ -63,7 +66,7 @@ $result = $conn->query($query);
                 <?php endwhile; ?>
             <?php else: ?>
                 <tr>
-                    <td colspan="<?php echo ($_SESSION['user_type'] == 'admin') ? 6 : 5; ?>">No researchers found.</td>
+                    <td colspan="<?php echo ($_SESSION['user_type'] == 'admin') ? 8 : 7; ?>">No researchers found.</td>
                 </tr>
             <?php endif; ?>
         </tbody>
@@ -73,6 +76,8 @@ $result = $conn->query($query);
     $dashboard_url = '/research_management/public/dashboard.php';
     if ($_SESSION['user_type'] == 'faculty') {
         $dashboard_url = '/research_management/public/dashboard_faculty.php';
+    } elseif ($_SESSION['user_type'] == 'student') {
+        $dashboard_url = '/research_management/public/dashboard_student.php';
     }
     ?>
     <a href="<?php echo $dashboard_url; ?>">Back to Dashboard</a>

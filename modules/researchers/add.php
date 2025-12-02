@@ -67,9 +67,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         } else if ($type == 'faculty') {
             $experience = $_POST['experience'];
+            $initials = $_POST['initials'];
 
-            $stmt_faculty = $conn->prepare("INSERT INTO faculty (researcher_id, experience) VALUES (?, ?)");
-            $stmt_faculty->bind_param("si", $researcher_id, $experience);
+            $stmt_faculty = $conn->prepare("INSERT INTO faculty (researcher_id, experience, initials) VALUES (?, ?, ?)");
+            $stmt_faculty->bind_param("sis", $researcher_id, $experience, $initials);
 
             if (!$stmt_faculty->execute()) {
                 throw new Exception("Error inserting faculty details: " . $stmt_faculty->error);
@@ -166,6 +167,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div id="faculty_fields" style="display:none;">
             <label>Experience (Years):</label> <input type="number" name="experience" id="experience"><br><br>
+            <label>Initials:</label> <input type="text" name="initials" id="initials"><br><br>
         </div>
 
         <button type="submit">Add Researcher</button>
