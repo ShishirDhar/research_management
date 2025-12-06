@@ -111,7 +111,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Researcher</title>
+    <title>Add Researcher - RMS</title>
+    <link rel="stylesheet" href="/research_management/public/css/style.css">
     <script>
         function toggleFields() {
             var type = document.getElementById('type').value;
@@ -136,44 +137,92 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 
 <body>
-    <h1>Add New Researcher</h1>
-    <?php if ($error)
-        echo "<p style='color:red'>$error</p>"; ?>
-    <?php if ($success)
-        echo "<p style='color:green'>$success</p>"; ?>
+    <div class="dashboard-container">
+        <?php include __DIR__ . '/../../public/includes/sidebar.php'; ?>
 
-    <form action="add.php" method="POST">
-        <label>First Name:</label> <input type="text" name="f_name" required><br><br>
-        <label>Last Name:</label> <input type="text" name="l_name" required><br><br>
-        <label>Email:</label> <input type="email" name="email" required><br><br>
-        <label>Password:</label> <input type="password" name="password" required><br><br>
-        <label>Department:</label> <input type="text" name="department" required><br><br>
+        <main class="main-content">
+            <div class="page-header">
+                <h1>Add New Researcher</h1>
+                <p>Create a new researcher profile in the system.</p>
+            </div>
 
-        <label>Contact No:</label> <input type="text" name="contact_no"><br><br>
-        <label>Biography:</label> <textarea name="biography"></textarea><br><br>
-        <label>Research Interests:</label> <input type="text" name="research_interests"><br><br>
+            <?php if ($error)
+                echo "<div class='error-message'>$error</div>"; ?>
+            <?php if ($success)
+                echo "<div class='success-message' style='color: green; padding: 10px; background: #ecfdf5; border-radius: 6px; margin-bottom: 20px;'>$success</div>"; ?>
 
-        <label>Type:</label>
-        <select name="type" id="type" onchange="toggleFields()" required>
-            <option value="student">Student</option>
-            <option value="faculty">Faculty</option>
-        </select><br><br>
+            <div class="form-container">
+                <form action="add.php" method="POST" class="modern-form">
+                    <div class="form-group">
+                        <label>First Name</label>
+                        <input type="text" name="f_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        <input type="text" name="l_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" name="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Department</label>
+                        <input type="text" name="department" required>
+                    </div>
 
-        <div id="student_fields">
-            <label>Degree Program:</label> <input type="text" name="degree_program" id="degree_program"
-                required><br><br>
-            <label>Year Level:</label> <input type="text" name="year_level" id="year_level" required><br><br>
-        </div>
+                    <div class="form-group">
+                        <label>Contact No</label>
+                        <input type="text" name="contact_no">
+                    </div>
+                    <div class="form-group">
+                        <label>Biography</label>
+                        <textarea name="biography" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Research Interests</label>
+                        <input type="text" name="research_interests">
+                    </div>
 
-        <div id="faculty_fields" style="display:none;">
-            <label>Experience (Years):</label> <input type="number" name="experience" id="experience"><br><br>
-            <label>Initials:</label> <input type="text" name="initials" id="initials"><br><br>
-        </div>
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select name="type" id="type" onchange="toggleFields()" required>
+                            <option value="student">Student</option>
+                            <option value="faculty">Faculty</option>
+                        </select>
+                    </div>
 
-        <button type="submit">Add Researcher</button>
-    </form>
-    <br>
-    <a href="list.php">Back to List</a>
+                    <div id="student_fields">
+                        <div class="form-group">
+                            <label>Degree Program</label>
+                            <input type="text" name="degree_program" id="degree_program" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Year Level</label>
+                            <input type="text" name="year_level" id="year_level" required>
+                        </div>
+                    </div>
+
+                    <div id="faculty_fields" style="display:none;">
+                        <div class="form-group">
+                            <label>Experience (Years)</label>
+                            <input type="number" name="experience" id="experience">
+                        </div>
+                        <div class="form-group">
+                            <label>Initials</label>
+                            <input type="text" name="initials" id="initials">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit">Add Researcher</button>
+                    <a href="list.php" style="margin-left: 15px; color: #6b7280; text-decoration: none;">Cancel</a>
+                </form>
+            </div>
+        </main>
+    </div>
 </body>
 
 </html>

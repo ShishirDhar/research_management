@@ -17,16 +17,9 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST') 
     $user_type = $_POST['user_type'];
 
     if ($user_type == 'admin') {
-
-        $stmt = $conn->prepare('SELECT id,password FROM admin_user WHERE username = ?');
-        $stmt->bind_param("s", $username);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $user = $result->fetch_assoc();
-
-
-        if ($user && $password === $user['password']) {
-            $_SESSION['uid'] = $user['id'];
+        // Hardcoded admin login
+        if ($username === 'admin' && $password === 'pass123') {
+            $_SESSION['uid'] = 1; // Dummy ID for admin
             $_SESSION['user_type'] = 'admin';
             header('Location: /research_management/public/dashboard.php');
             exit();
@@ -87,7 +80,7 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST') 
     <link rel="stylesheet" href="css/style.css?v=<?php echo time(); ?>">
 </head>
 
-<body>
+<body class="login-body">
     <div class="login-container">
         <div class="login-left">
             <h1>Research<br>Management<br>System</h1>

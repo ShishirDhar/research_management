@@ -92,26 +92,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add New Project</title>
+    <title>Add New Project - RMS</title>
+    <link rel="stylesheet" href="/research_management/public/css/style.css">
     <script>
         function addTeamMember() {
             const container = document.getElementById('team-members-container');
             const index = container.children.length;
 
             const div = document.createElement('div');
-            div.style.marginBottom = '10px';
+            div.className = 'form-group';
+            div.style.display = 'flex';
+            div.style.gap = '10px';
+            div.style.alignItems = 'end';
 
-            let html = '<select name="team_members[]" required>';
+            let html = '<div style="flex: 2;">';
+            html += '<label style="font-size: 0.85rem; color: #6b7280; margin-bottom: 4px;">Researcher</label>';
+            html += '<select name="team_members[]" required style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; background: #f9fafb;">';
             html += '<option value="">Select Researcher</option>';
             <?php foreach ($researchers as $r): ?>
                 html += '<option value="<?php echo htmlspecialchars($r['researcher_id']); ?>">';
                 html += '<?php echo htmlspecialchars($r['f_name'] . ' ' . $r['l_name']); ?> (<?php echo $r['researcher_id']; ?>)';
                 html += '</option>';
             <?php endforeach; ?>
-            html += '</select> ';
+            html += '</select></div>';
 
-            html += '<input type="text" name="roles[]" placeholder="Role (e.g. Co-PI)" required> ';
-            html += '<button type="button" onclick="this.parentNode.remove()">Remove</button>';
+            html += '<div style="flex: 2;">';
+            html += '<label style="font-size: 0.85rem; color: #6b7280; margin-bottom: 4px;">Role</label>';
+            html += '<input type="text" name="roles[]" placeholder="e.g. Co-PI" required style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; background: #f9fafb;"></div>';
+
+            html += '<button type="button" onclick="this.parentNode.remove()" style="padding: 10px; background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; border-radius: 6px; cursor: pointer;">Remove</button>';
 
             div.innerHTML = html;
             container.appendChild(div);
@@ -120,46 +129,76 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 
 <body>
-    <h1>Add New Project</h1>
-    <?php if ($error)
-        echo "<p style='color:red'>$error</p>"; ?>
-    <?php if ($success)
-        echo "<p style='color:green'>$success</p>"; ?>
+    <div class="dashboard-container">
+        <?php include __DIR__ . '/../../public/includes/sidebar.php'; ?>
 
-    <form action="add.php" method="POST">
-        <label>Project Title:</label> <input type="text" name="project_title" required><br><br>
+        <main class="main-content">
+            <div class="page-header">
+                <h1>Add New Project</h1>
+                <p>Initialize a new research project.</p>
+            </div>
 
-        <label>Project Lead:</label>
-        <select name="project_lead" required>
-            <option value="">Select Researcher</option>
-            <?php foreach ($researchers as $r): ?>
-                <option value="<?php echo htmlspecialchars($r['researcher_id']); ?>">
-                    <?php echo htmlspecialchars($r['f_name'] . ' ' . $r['l_name']); ?> (<?php echo $r['researcher_id']; ?>)
-                </option>
-            <?php endforeach; ?>
-        </select><br><br>
+            <?php if ($error)
+                echo "<div class='error-message'>$error</div>"; ?>
+            <?php if ($success)
+                echo "<div class='success-message' style='color: green; padding: 10px; background: #ecfdf5; border-radius: 6px; margin-bottom: 20px;'>$success</div>"; ?>
 
-        <label>Status:</label>
-        <select name="status" required>
-            <option value="ongoing">Ongoing</option>
-            <option value="completed">Completed</option>
-            <option value="published">Published</option>
-        </select><br><br>
+            <div class="form-container">
+                <form action="add.php" method="POST" class="modern-form">
+                    <div class="form-group">
+                        <label>Project Title</label>
+                        <input type="text" name="project_title" required>
+                    </div>
 
-        <label>Start Date:</label> <input type="date" name="start_date" required><br><br>
-        <label>End Date:</label> <input type="date" name="end_date" required><br><br>
+                    <div class="form-group">
+                        <label>Project Lead</label>
+                        <select name="project_lead" required>
+                            <option value="">Select Researcher</option>
+                            <?php foreach ($researchers as $r): ?>
+                                <option value="<?php echo htmlspecialchars($r['researcher_id']); ?>">
+                                    <?php echo htmlspecialchars($r['f_name'] . ' ' . $r['l_name']); ?>
+                                    (<?php echo $r['researcher_id']; ?>)
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
 
-        <h3>Team Members</h3>
-        <div id="team-members-container">
-            <!-- Dynamic rows will be added here -->
-        </div>
-        <button type="button" onclick="addTeamMember()">Add Team Member</button>
-        <br><br>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select name="status" required>
+                            <option value="ongoing">Ongoing</option>
+                            <option value="completed">Completed</option>
+                            <option value="published">Published</option>
+                        </select>
+                    </div>
 
-        <button type="submit">Add Project</button>
-    </form>
-    <br>
-    <a href="list.php">Back to List</a>
+                    <div style="display: flex; gap: 20px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Start Date</label>
+                            <input type="date" name="start_date" required>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>End Date</label>
+                            <input type="date" name="end_date" required>
+                        </div>
+                    </div>
+
+                    <div style="margin: 30px 0; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                        <h3 style="font-size: 1.1rem; color: #374151; margin-bottom: 15px;">Team Members</h3>
+                        <div id="team-members-container">
+                            <!-- Dynamic rows will be added here -->
+                        </div>
+                        <button type="button" onclick="addTeamMember()"
+                            style="background: white; border: 1px dashed #d1d5db; color: #4f46e5; padding: 10px; width: 100%; border-radius: 6px; cursor: pointer; font-weight: 500;">+
+                            Add Team Member</button>
+                    </div>
+
+                    <button type="submit" class="btn-submit">Add Project</button>
+                    <a href="list.php" style="margin-left: 15px; color: #6b7280; text-decoration: none;">Cancel</a>
+                </form>
+            </div>
+        </main>
+    </div>
 </body>
 
 </html>

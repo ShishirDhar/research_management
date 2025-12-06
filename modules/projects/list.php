@@ -28,81 +28,95 @@ if ($_SESSION['user_type'] == 'admin') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Projects</title>
+    <title>Projects - RMS</title>
+    <link rel="stylesheet" href="/research_management/public/css/style.css">
 </head>
 
 <body>
-    <h1>Projects</h1>
-    <?php if ($_SESSION['user_type'] != 'student'): ?>
-        <a href="add.php">Add New Project</a>
-        <br><br>
-    <?php endif; ?>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Lead</th>
-                <th>Status</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Team Members</th>
-                <?php if ($_SESSION['user_type'] != 'student'): ?>
-                    <th>Actions</th>
-                <?php endif; ?>
-            </tr>
-        </thead>
-        <tbody>
-            <?php if ($result->num_rows > 0): ?>
-                <?php while ($row = $result->fetch_assoc()): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($row['project_id']); ?></td>
-                        <td><?php echo htmlspecialchars($row['project_title']); ?></td>
-                        <td><?php echo htmlspecialchars($row['project_lead']); ?></td>
-                        <td><?php echo htmlspecialchars($row['status']); ?></td>
-                        <td><?php echo htmlspecialchars($row['start_date']); ?></td>
-                        <td><?php echo htmlspecialchars($row['end_date']); ?></td>
-                        <td>
-                            <?php
-                            $pid = $row['project_id'];
-                            $tm_query = "SELECT r.f_name, r.l_name, rp.role FROM researcher_project rp JOIN researcher r ON rp.researcher_id = r.researcher_id WHERE rp.project_id = ?";
-                            $stmt_tm = $conn->prepare($tm_query);
-                            $stmt_tm->bind_param("s", $pid);
-                            $stmt_tm->execute();
-                            $res_tm = $stmt_tm->get_result();
-                            $members = [];
-                            while ($tm = $res_tm->fetch_assoc()) {
-                                $members[] = htmlspecialchars($tm['f_name'] . ' ' . $tm['l_name'] . ' (' . $tm['role'] . ')');
-                            }
-                            echo implode(', ', $members);
-                            ?>
-                        </td>
-                        <?php if ($_SESSION['user_type'] != 'student'): ?>
-                            <td>
-                                <a href="edit.php?id=<?php echo $row['project_id']; ?>">Edit</a> |
-                                <a href="delete.php?id=<?php echo $row['project_id']; ?>"
-                                    onclick="return confirm('Are you sure?')">Delete</a>
-                            </td>
-                        <?php endif; ?>
-                    </tr>
-                <?php endwhile; ?>
-            <?php else: ?>
-                <tr>
-                    <td colspan="<?php echo ($_SESSION['user_type'] != 'student') ? 8 : 7; ?>">No projects found.</td>
-                </tr>
+    <div class="dashboard-container">
+        <?php include __DIR__ . '/../../public/includes/sidebar.php'; ?>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1>Projects</h1>
+                <p>Manage and track research projects.</p>
+            </div>
+
+            <?php if ($_SESSION['user_type'] != 'student'): ?>
+                <a href="add.php" class="btn-primary">Add New Project</a>
             <?php endif; ?>
-        </tbody>
-    </table>
-    <br>
-    <?php
-    $dashboard_url = '/research_management/public/dashboard.php';
-    if ($_SESSION['user_type'] == 'faculty') {
-        $dashboard_url = '/research_management/public/dashboard_faculty.php';
-    } elseif ($_SESSION['user_type'] == 'student') {
-        $dashboard_url = '/research_management/public/dashboard_student.php';
-    }
-    ?>
-    <a href="<?php echo $dashboard_url; ?>">Back to Dashboard</a>
+
+            <div class="table-container">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Lead</th>
+                            <th>Status</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Team Members</th>
+                            <?php if ($_SESSION['user_type'] != 'student'): ?>
+                                <th>Actions</th>
+                            <?php endif; ?>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if ($result->num_rows > 0): ?>
+                            <?php while ($row = $result->fetch_assoc()): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($row['project_id']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['project_title']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['project_lead']); ?></td>
+                                    <td>
+                                        <span style="
+                                            padding: 4px 8px; 
+                                            border-radius: 4px; 
+                                            font-size: 0.85rem; 
+                                            background: <?php echo ($row['status'] == 'ongoing') ? '#dbeafe' : '#f3f4f6'; ?>;
+                                            color: <?php echo ($row['status'] == 'ongoing') ? '#1e40af' : '#374151'; ?>;
+                                        ">
+                                            <?php echo htmlspecialchars($row['status']); ?>
+                                        </span>
+                                    </td>
+                                    <td><?php echo htmlspecialchars($row['start_date']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['end_date']); ?></td>
+                                    <td>
+                                        <?php
+                                        $pid = $row['project_id'];
+                                        $tm_query = "SELECT r.f_name, r.l_name, rp.role FROM researcher_project rp JOIN researcher r ON rp.researcher_id = r.researcher_id WHERE rp.project_id = ?";
+                                        $stmt_tm = $conn->prepare($tm_query);
+                                        $stmt_tm->bind_param("s", $pid);
+                                        $stmt_tm->execute();
+                                        $res_tm = $stmt_tm->get_result();
+                                        $members = [];
+                                        while ($tm = $res_tm->fetch_assoc()) {
+                                            $members[] = htmlspecialchars($tm['f_name'] . ' ' . $tm['l_name']);
+                                        }
+                                        echo implode(', ', $members);
+                                        ?>
+                                    </td>
+                                    <?php if ($_SESSION['user_type'] != 'student'): ?>
+                                        <td>
+                                            <a href="edit.php?id=<?php echo $row['project_id']; ?>">Edit</a>
+                                            <a href="delete.php?id=<?php echo $row['project_id']; ?>"
+                                                onclick="return confirm('Are you sure?')" style="color: #ef4444;">Delete</a>
+                                        </td>
+                                    <?php endif; ?>
+                                </tr>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="<?php echo ($_SESSION['user_type'] != 'student') ? 8 : 7; ?>"
+                                    style="text-align: center; color: #6b7280;">No projects found.</td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
 </body>
 
 </html>
