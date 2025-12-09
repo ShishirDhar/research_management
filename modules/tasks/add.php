@@ -72,48 +72,82 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add New Task</title>
+    <title>Add New Task - RMS</title>
+    <link rel="stylesheet" href="/research_management/public/css/style.css?v=<?php echo time(); ?>">
 </head>
 
 <body>
-    <h1>Add New Task</h1>
-    <?php if ($error)
-        echo "<p style='color:red'>$error</p>"; ?>
-    <?php if ($success)
-        echo "<p style='color:green'>$success</p>"; ?>
+    <div class="dashboard-container">
+        <?php include __DIR__ . '/../../public/includes/topbar.php'; ?>
 
-    <form action="add.php" method="POST">
-        <label>Project:</label>
-        <select name="project_id" required>
-            <option value="">Select Project</option>
-            <?php while ($p = $projects_result->fetch_assoc()): ?>
-                <option value="<?php echo htmlspecialchars($p['project_id']); ?>">
-                    <?php echo htmlspecialchars($p['project_title']); ?>
-                </option>
-            <?php endwhile; ?>
-        </select><br><br>
+        <main class="main-content">
+            <div class="page-header">
+                <h1>Add New Task</h1>
+                <p>Assign tasks to your projects and track progress.</p>
+            </div>
 
-        <label>Task Name:</label> <input type="text" name="task_name" required><br><br>
+            <?php if ($error)
+                echo "<div class='error-message'>$error</div>"; ?>
+            <?php if ($success)
+                echo "<div class='success-message' style='color: #065f46; background: #d1fae5; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #a7f3d0;'>$success</div>"; ?>
 
-        <label>Status:</label>
-        <select name="task_status" required>
-            <option value="not_started">Not Started</option>
-            <option value="in_progress">In Progress</option>
-            <option value="completed">Completed</option>
-        </select><br><br>
+            <div class="form-container">
+                <form action="add.php" method="POST" class="modern-form">
+                    <div class="form-group">
+                        <label>Project</label>
+                        <select name="project_id" required>
+                            <option value="">Select Project</option>
+                            <?php
+                            // Reset pointer just in case
+                            $projects_result->data_seek(0);
+                            while ($p = $projects_result->fetch_assoc()):
+                                ?>
+                                <option value="<?php echo htmlspecialchars($p['project_id']); ?>">
+                                    <?php echo htmlspecialchars($p['project_title']); ?>
+                                </option>
+                            <?php endwhile; ?>
+                        </select>
+                    </div>
 
-        <label>Due Date:</label> <input type="date" name="due_date" required><br><br>
+                    <div class="form-group">
+                        <label>Task Name</label>
+                        <input type="text" name="task_name" placeholder="e.g. Conduct Literature Review" required>
+                    </div>
 
-        <label>Description:</label><br>
-        <textarea name="task_description" rows="4" cols="50"></textarea><br><br>
+                    <div style="display: flex; gap: 20px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Status</label>
+                            <select name="task_status" required>
+                                <option value="not_started">Not Started</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Due Date</label>
+                            <input type="date" name="due_date" required>
+                        </div>
+                    </div>
 
-        <button type="submit">Add Task</button>
-    </form>
-    <br>
-    <?php
-    $dashboard_url = ($_SESSION['user_type'] == 'faculty') ? '/research_management/public/dashboard_faculty.php' : '/research_management/public/dashboard.php';
-    ?>
-    <a href="<?php echo $dashboard_url; ?>">Back to Dashboard</a>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea name="task_description" rows="4"
+                            placeholder="Detail the task requirements..."></textarea>
+                    </div>
+
+                    <div style="margin-top: 30px;">
+                        <button type="submit" class="btn-submit">Add Task</button>
+                        <?php
+                        $dashboard_url = ($_SESSION['user_type'] == 'faculty') ? '/research_management/public/dashboard_faculty.php' : '/research_management/public/dashboard.php';
+                        ?>
+                        <a href="<?php echo $dashboard_url; ?>"
+                            style="margin-left: 20px; color: #6b7280; text-decoration: none; font-weight: 500;">Back to
+                            Dashboard</a>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
 </body>
 
 </html>
