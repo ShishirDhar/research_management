@@ -211,81 +211,97 @@ button.btn-login:hover {
         padding: 40px;
     }
 }
-/* Dashboard Layout */
+
+/* Dashboard Layout - Topbar Mode */
 .dashboard-container {
     display: flex;
+    flex-direction: column;
     min-height: 100vh;
 }
 
-/* Sidebar */
-.sidebar {
-    width: 260px;
-    background: #1e1b4b; /* Deep Indigo */
+/* Topbar */
+.topbar {
+    background: #1e1b4b;
+    /* Deep Indigo */
     color: white;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-}
-
-.sidebar-header {
-    padding: 25px;
-    font-size: 1.2rem;
-    font-weight: 700;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(0, 0, 0, 0.2);
-}
-
-.sidebar-nav {
-    flex: 1;
-    padding: 20px 0;
-}
-
-.sidebar-nav ul {
-    list-style: none;
-}
-
-.sidebar-nav a {
+    height: 64px;
     display: flex;
     align-items: center;
-    padding: 15px 25px;
-    text-decoration: none;
-    color: #c7d2fe;
-    transition: all 0.3s;
-    font-weight: 500;
+    justify-content: space-between;
+    padding: 0 30px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
-.sidebar-nav a:hover,
-.sidebar-nav a.active {
-    background: rgba(255, 255, 255, 0.05);
+.topbar-logo {
+    font-size: 1.3rem;
+    font-weight: 700;
     color: white;
-    border-left: 4px solid #4f46e5;
+    letter-spacing: 0.5px;
 }
 
-.sidebar-footer {
-    padding: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+.topbar-nav ul {
+    list-style: none;
+    display: flex;
+    gap: 10px;
 }
 
-.btn-logout {
-    width: 100%;
-    padding: 10px;
+.topbar-nav a {
+    color: #c7d2fe;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+.topbar-nav a:hover,
+.topbar-nav a.active {
     background: rgba(255, 255, 255, 0.1);
     color: white;
-    border: none;
+}
+
+.btn-logout-top {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 6px 16px;
     border-radius: 6px;
     cursor: pointer;
-    transition: background 0.3s;
+    font-weight: 500;
+    transition: all 0.2s;
 }
 
-.btn-logout:hover {
-    background: #ef4444; /* Red for logout */
+.btn-logout-top:hover {
+    background: #ef4444;
+    border-color: #ef4444;
 }
 
-/* Main Content */
+/* Responsive Topbar */
+@media (max-width: 900px) {
+    .topbar {
+        height: auto;
+        flex-direction: column;
+        padding: 15px;
+        gap: 15px;
+    }
+
+    .topbar-nav ul {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
+/* Main Content Adjustments */
 .main-content {
     flex: 1;
     padding: 30px;
-    overflow-y: auto;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
 }
 
 .page-header {
@@ -331,9 +347,17 @@ button.btn-login:hover {
     color: #1f2937;
 }
 
-.stat-card.green { border-left-color: #10b981; }
-.stat-card.blue { border-left-color: #3b82f6; }
-.stat-card.purple { border-left-color: #8b5cf6; }
+.stat-card.green {
+    border-left-color: #10b981;
+}
+
+.stat-card.blue {
+    border-left-color: #3b82f6;
+}
+
+.stat-card.purple {
+    border-left-color: #8b5cf6;
+}
 
 /* Quick Actions / Cards */
 .section-title {

@@ -33,24 +33,7 @@ $total_funding_left = $total_funding_left_result->fetch_assoc()['s'];
 <body>
     <div class="dashboard-container">
         <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                RMS Admin
-            </div>
-            <nav class="sidebar-nav">
-                <ul>
-                    <li><a href="dashboard.php" class="active">Overview</a></li>
-                    <li><a href="/research_management/modules/researchers/list.php">Manage Researchers</a></li>
-                    <li><a href="/research_management/modules/projects/list.php">Projects</a></li>
-                    <li><a href="/research_management/modules/publications/list.php">Publications</a></li>
-                </ul>
-            </nav>
-            <div class="sidebar-footer">
-                <form action="logout.php" method="POST">
-                    <button type="submit" class="btn-logout">Logout</button>
-                </form>
-            </div>
-        </aside>
+        <?php include __DIR__ . '/includes/topbar.php'; ?>
 
         <!-- Main Content -->
         <main class="main-content">

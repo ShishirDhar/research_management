@@ -18,12 +18,12 @@ $result = $conn->query($query);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Researchers - RMS</title>
-    <link rel="stylesheet" href="/research_management/public/css/style.css">
+    <link rel="stylesheet" href="/research_management/public/css/style.css?v=<?php echo time(); ?>">
 </head>
 
 <body>
     <div class="dashboard-container">
-        <?php include __DIR__ . '/../../public/includes/sidebar.php'; ?>
+        <?php include __DIR__ . '/../../public/includes/topbar.php'; ?>
 
         <main class="main-content">
             <div class="page-header">

@@ -112,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Researcher - RMS</title>
-    <link rel="stylesheet" href="/research_management/public/css/style.css">
+    <link rel="stylesheet" href="/research_management/public/css/style.css?v=<?php echo time(); ?>">
     <script>
         function toggleFields() {
             var type = document.getElementById('type').value;
@@ -138,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body>
     <div class="dashboard-container">
-        <?php include __DIR__ . '/../../public/includes/sidebar.php'; ?>
+        <?php include __DIR__ . '/../../public/includes/topbar.php'; ?>
 
         <main class="main-content">
             <div class="page-header">

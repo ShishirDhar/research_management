@@ -19,7 +19,7 @@ $uid = $_SESSION['uid'];
 
 <body>
     <div class="dashboard-container">
-        <?php include __DIR__ . '/includes/sidebar.php'; ?>
+        <?php include __DIR__ . '/includes/topbar.php'; ?>
 
         <main class="main-content">
             <div class="page-header">
@@ -99,7 +99,8 @@ $uid = $_SESSION['uid'];
                                         </span>
                                     </td>
                                     <td style="color: #6b7280; font-size: 0.9rem;">
-                                        <?php echo htmlspecialchars($task['due_date']); ?></td>
+                                        <?php echo htmlspecialchars($task['due_date']); ?>
+                                    </td>
                                     <td
                                         style="max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #6b7280;">
                                         <?php echo htmlspecialchars($task['task_description']); ?>
