@@ -48,11 +48,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $project_id = "p1";
             }
 
+            // 1. Insert Project (without publication_type column)
             $stmt = $conn->prepare("INSERT INTO project (project_id, project_title, project_lead, status, start_date, end_date) VALUES (?, ?, ?, ?, ?, ?)");
             $stmt->bind_param("ssssss", $project_id, $project_title, $project_lead, $status, $start_date, $end_date);
 
             if (!$stmt->execute()) {
                 throw new Exception("Error adding project: " . $stmt->error);
+            }
+
+            // 2. Handle Publication if Published
+            if ($status == 'published') {
+                $pub_type = $_POST['publication_type'] ?? 'paper';
+                $pub_id = 'pub_' . $project_id;
+
+                // Fetch department from lead researcher
+                $dept_query = "SELECT department FROM researcher WHERE researcher_id = ?";
+                $stmt_dept = $conn->prepare($dept_query);
+                $stmt_dept->bind_param("s", $project_lead);
+                $stmt_dept->execute();
+                $res_dept = $stmt_dept->get_result();
+                $dept_row = $res_dept->fetch_assoc();
+                $department = $dept_row['department'] ?? 'Unassigned';
+
+                // Insert into Publication
+                // Use project_id as publication_id or derived one. The schema requires publication_id.
+                // Assuming end_date as publication date
+                $citations = rand(1, 50);
+                $stmt_pub = $conn->prepare("INSERT INTO publication (publication_id, project_id, title, publication_date, department, citation_count, type, file_path) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')");
+                $stmt_pub->bind_param("sssssis", $pub_id, $project_id, $project_title, $end_date, $department, $citations, $pub_type);
+
+                if (!$stmt_pub->execute()) {
+                    throw new Exception("Error creating publication record: " . $stmt_pub->error);
+                }
             }
 
             // Handle Team Members
@@ -165,10 +192,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     <div class="form-group">
                         <label>Status</label>
-                        <select name="status" required>
+                        <select name="status" id="project_status" onchange="togglePublicationType()" required>
                             <option value="ongoing">Ongoing</option>
                             <option value="completed">Completed</option>
                             <option value="published">Published</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="publication_type_container" style="display: none;">
+                        <label>Publication Type</label>
+                        <select name="publication_type" id="publication_type">
+                            <option value="">Select Type</option>
+                            <option value="paper">Paper</option>
+                            <option value="journal">Journal</option>
+                            <option value="conference">Conference</option>
                         </select>
                     </div>
 
@@ -182,6 +219,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <input type="date" name="end_date" required>
                         </div>
                     </div>
+
+                    <script>
+                        function togglePublicationType() {
+                            const status = document.getElementById('project_status').value;
+                            const typeContainer = document.getElementById('publication_type_container');
+                            const typeSelect = document.getElementById('publication_type');
+
+                            if (status === 'published') {
+                                typeContainer.style.display = 'block';
+                                typeSelect.required = true;
+                            } else {
+                                typeContainer.style.display = 'none';
+                                typeSelect.required = false;
+                                typeSelect.value = '';
+                            }
+                        }
+                    </script>
 
                     <div style="margin: 30px 0; padding-top: 20px; border-top: 1px solid #e5e7eb;">
                         <h3 style="font-size: 1.1rem; color: #374151; margin-bottom: 15px;">Team Members</h3>

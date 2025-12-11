@@ -16,7 +16,7 @@ $sync_query = "
         p.project_title, 
         COALESCE(p.end_date, CURRENT_DATE), 
         COALESCE(r.department, 'Unassigned'), 
-        0, 
+        FLOOR(1 + RAND() * 50), 
         'paper', 
         'pending'
     FROM project p
@@ -37,22 +37,11 @@ $citation_min = $_GET['citation_min'] ?? '';
 $params = [];
 
 // Base Query
-if ($_SESSION['user_type'] == 'admin') {
-    // Admin sees ALL publications
-    $query = "SELECT DISTINCT pb.* 
-              FROM publication pb
-              JOIN project pr ON pb.project_id = pr.project_id
-              WHERE 1=1";
-} else {
-    // Faculty/Student sees ONLY their involved publications
-    $query = "SELECT DISTINCT pb.* 
-              FROM publication pb
-              JOIN project pr ON pb.project_id = pr.project_id
-              LEFT JOIN researcher_project rp ON pr.project_id = rp.project_id
-              WHERE (pr.project_lead = ? OR rp.researcher_id = ?)";
-    $params[] = $uid;
-    $params[] = $uid;
-}
+// Base Query - Show ALL publications for everyone
+$query = "SELECT DISTINCT pb.* 
+          FROM publication pb
+          JOIN project pr ON pb.project_id = pr.project_id
+          WHERE pr.status = 'published'";
 
 if (!empty($search)) {
     $query .= " AND pb.title LIKE ?";
@@ -87,7 +76,7 @@ $result = $stmt->get_result();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Publications - RMS</title>
+    <title>Publications - RMS</title>
     <link rel="stylesheet" href="/research_management/public/css/style.css?v=<?php echo time(); ?>">
     <style>
         .filter-form {
@@ -147,8 +136,8 @@ $result = $stmt->get_result();
 
         <main class="main-content">
             <div class="page-header">
-                <h1>My Publications</h1>
-                <p>View published projects you have contributed to.</p>
+                <h1>Publications</h1>
+                <p>View all published research works.</p>
             </div>
 
             <!-- Search & Filter Form -->

@@ -145,51 +145,114 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Researcher</title>
+    <title>Edit Researcher - RMS</title>
+    <link rel="stylesheet" href="/research_management/public/css/style.css?v=<?php echo time(); ?>">
 </head>
 
 <body>
-    <h1>Edit Researcher</h1>
-    <?php if ($error)
-        echo "<p style='color:red'>$error</p>"; ?>
-    <?php if ($success)
-        echo "<p style='color:green'>$success</p>"; ?>
+    <div class="dashboard-container">
+        <?php include __DIR__ . '/../../public/includes/topbar.php'; ?>
 
-    <form action="edit.php?id=<?php echo $id; ?>" method="POST">
-        <label>First Name:</label> <input type="text" name="f_name"
-            value="<?php echo htmlspecialchars($researcher['f_name']); ?>" required><br><br>
-        <label>Last Name:</label> <input type="text" name="l_name"
-            value="<?php echo htmlspecialchars($researcher['l_name']); ?>" required><br><br>
-        <label>Email:</label> <input type="email" name="email"
-            value="<?php echo htmlspecialchars($researcher['email']); ?>" required><br><br>
-        <label>Department:</label> <input type="text" name="department"
-            value="<?php echo htmlspecialchars($researcher['department']); ?>" required><br><br>
+        <main class="main-content">
+            <div class="page-header">
+                <h1>Edit Researcher</h1>
+                <p>Update researcher details and profile information.</p>
+            </div>
 
-        <label>Contact No:</label> <input type="text" name="contact_no"
-            value="<?php echo htmlspecialchars($contact_data['contact_no'] ?? ''); ?>"><br><br>
-        <label>Biography:</label> <textarea
-            name="biography"><?php echo htmlspecialchars($profile_data['biography'] ?? ''); ?></textarea><br><br>
-        <label>Research Interests:</label> <input type="text" name="research_interests"
-            value="<?php echo htmlspecialchars($profile_data['research_interests'] ?? ''); ?>"><br><br>
+            <?php if ($error)
+                echo "<div class='error-message'>$error</div>"; ?>
+            <?php if ($success)
+                echo "<div class='success-message' style='color: #065f46; background: #d1fae5; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #a7f3d0;'>$success</div>"; ?>
 
-        <p><strong>Type:</strong> <?php echo ucfirst($type); ?></p>
+            <div class="form-container">
+                <form action="edit.php?id=<?php echo $id; ?>" method="POST" class="modern-form">
+                    <div style="display: flex; gap: 20px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label>First Name</label>
+                            <input type="text" name="f_name"
+                                value="<?php echo htmlspecialchars($researcher['f_name']); ?>" required>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Last Name</label>
+                            <input type="text" name="l_name"
+                                value="<?php echo htmlspecialchars($researcher['l_name']); ?>" required>
+                        </div>
+                    </div>
 
-        <?php if ($type == 'student'): ?>
-            <label>Degree Program:</label> <input type="text" name="degree_program"
-                value="<?php echo htmlspecialchars($student_data['degree_program']); ?>" required><br><br>
-            <label>Year Level:</label> <input type="text" name="year_level"
-                value="<?php echo htmlspecialchars($student_data['year_level']); ?>" required><br><br>
-        <?php elseif ($type == 'faculty'): ?>
-            <label>Experience (Years):</label> <input type="number" name="experience"
-                value="<?php echo htmlspecialchars($faculty_data['experience']); ?>" required><br><br>
-            <label>Initials:</label> <input type="text" name="initials"
-                value="<?php echo htmlspecialchars($faculty_data['initials'] ?? ''); ?>"><br><br>
-        <?php endif; ?>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" name="email" value="<?php echo htmlspecialchars($researcher['email']); ?>"
+                            required>
+                    </div>
 
-        <button type="submit">Update Researcher</button>
-    </form>
-    <br>
-    <a href="list.php">Back to List</a>
+                    <div style="display: flex; gap: 20px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Department</label>
+                            <input type="text" name="department"
+                                value="<?php echo htmlspecialchars($researcher['department']); ?>" required>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Contact No</label>
+                            <input type="text" name="contact_no"
+                                value="<?php echo htmlspecialchars($contact_data['contact_no'] ?? ''); ?>">
+                        </div>
+                    </div>
+
+                    <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+
+                    <!-- Dynamic Fields based on Type -->
+                    <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+                        <h3
+                            style="font-size: 1rem; color: #374151; margin-bottom: 15px; text-transform: uppercase; font-weight: 600;">
+                            <?php echo ucfirst($type); ?> Details
+                        </h3>
+
+                        <?php if ($type == 'student'): ?>
+                            <div class="form-group">
+                                <label>Degree Program</label>
+                                <input type="text" name="degree_program"
+                                    value="<?php echo htmlspecialchars($student_data['degree_program']); ?>" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Year Level</label>
+                                <input type="text" name="year_level"
+                                    value="<?php echo htmlspecialchars($student_data['year_level']); ?>" required>
+                            </div>
+                        <?php elseif ($type == 'faculty'): ?>
+                            <div class="form-group">
+                                <label>Experience (Years)</label>
+                                <input type="number" name="experience"
+                                    value="<?php echo htmlspecialchars($faculty_data['experience']); ?>" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Initials</label>
+                                <input type="text" name="initials"
+                                    value="<?php echo htmlspecialchars($faculty_data['initials'] ?? ''); ?>">
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Biography</label>
+                        <textarea name="biography"
+                            rows="4"><?php echo htmlspecialchars($profile_data['biography'] ?? ''); ?></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Research Interests</label>
+                        <textarea name="research_interests"
+                            rows="3"><?php echo htmlspecialchars($profile_data['research_interests'] ?? ''); ?></textarea>
+                    </div>
+
+                    <div style="margin-top: 30px;">
+                        <button type="submit" class="btn-submit">Update Researcher</button>
+                        <a href="list.php"
+                            style="margin-left: 20px; color: #6b7280; text-decoration: none; font-weight: 500;">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
 </body>
 
 </html>
