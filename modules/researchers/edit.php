@@ -91,14 +91,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($type == 'student') {
             $degree_program = $_POST['degree_program'];
             $year_level = $_POST['year_level'];
-            $stmt_s = $conn->prepare("UPDATE student SET degree_program=?, year_level=? WHERE researcher_id=?");
-            $stmt_s->bind_param("sss", $degree_program, $year_level, $id);
+            $cgpa = $_POST['cgpa'];
+
+            if ($cgpa < 0 || $cgpa > 4) {
+                throw new Exception("CGPA must be between 0 and 4.00");
+            }
+
+            $stmt_s = $conn->prepare("UPDATE student SET degree_program=?, year_level=?, cgpa=? WHERE researcher_id=?");
+            $stmt_s->bind_param("ssds", $degree_program, $year_level, $cgpa, $id);
             $stmt_s->execute();
         } else if ($type == 'faculty') {
             $experience = $_POST['experience'];
             $initials = $_POST['initials'];
-            $stmt_f = $conn->prepare("UPDATE faculty SET experience=?, initials=? WHERE researcher_id=?");
-            $stmt_f->bind_param("iss", $experience, $initials, $id);
+            $designation = $_POST['designation'];
+
+            $stmt_f = $conn->prepare("UPDATE faculty SET experience=?, initials=?, designation=? WHERE researcher_id=?");
+            $stmt_f->bind_param("isss", $experience, $initials, $designation, $id);
             $stmt_f->execute();
         }
 
@@ -218,7 +226,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <input type="text" name="year_level"
                                     value="<?php echo htmlspecialchars($student_data['year_level']); ?>" required>
                             </div>
+                            <div class="form-group">
+                                <label>CGPA</label>
+                                <input type="number" name="cgpa" step="0.01" min="0" max="4"
+                                    value="<?php echo htmlspecialchars($student_data['cgpa'] ?? ''); ?>" required>
+                            </div>
                         <?php elseif ($type == 'faculty'): ?>
+                            <div class="form-group">
+                                <label>Designation</label>
+                                <input type="text" name="designation"
+                                    value="<?php echo htmlspecialchars($faculty_data['designation'] ?? ''); ?>">
+                            </div>
                             <div class="form-group">
                                 <label>Experience (Years)</label>
                                 <input type="number" name="experience"

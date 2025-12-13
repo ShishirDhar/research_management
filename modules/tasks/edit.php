@@ -65,47 +65,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Task</title>
+    <title>Edit Task - RMS</title>
+    <link rel="stylesheet" href="/research_management/public/css/style.css?v=<?php echo time(); ?>">
 </head>
 
 <body>
-    <h1>Edit Task</h1>
-    <?php if ($error)
-        echo "<p style='color:red'>$error</p>"; ?>
-    <?php if ($success)
-        echo "<p style='color:green'>$success</p>"; ?>
+    <div class="dashboard-container">
+        <?php include __DIR__ . '/../../public/includes/topbar.php'; ?>
 
-    <form action="edit.php?id=<?php echo $id; ?>" method="POST">
-        <label>Task Name:</label> <input type="text" name="task_name"
-            value="<?php echo htmlspecialchars($task['task_name']); ?>" required><br><br>
+        <main class="main-content">
+            <div class="page-header">
+                <h1>Edit Task</h1>
+                <p>Update task details and status.</p>
+            </div>
 
-        <label>Status:</label>
-        <select name="task_status" required>
-            <option value="not_started" <?php if ($task['task_status'] == 'not_started')
-                echo 'selected'; ?>>Not Started
-            </option>
-            <option value="in_progress" <?php if ($task['task_status'] == 'in_progress')
-                echo 'selected'; ?>>In Progress
-            </option>
-            <option value="completed" <?php if ($task['task_status'] == 'completed')
-                echo 'selected'; ?>>Completed
-            </option>
-        </select><br><br>
+            <?php if ($error)
+                echo "<div class='error-message'>$error</div>"; ?>
+            <?php if ($success)
+                echo "<div class='success-message' style='color: green; padding: 10px; background: #ecfdf5; border-radius: 6px; margin-bottom: 20px;'>$success</div>"; ?>
 
-        <label>Due Date:</label> <input type="date" name="due_date"
-            value="<?php echo htmlspecialchars($task['due_date']); ?>" required><br><br>
+            <div class="form-container">
+                <form action="edit.php?id=<?php echo $id; ?>" method="POST" class="modern-form">
+                    <div class="form-group">
+                        <label>Task Name</label>
+                        <input type="text" name="task_name" value="<?php echo htmlspecialchars($task['task_name']); ?>"
+                            required>
+                    </div>
 
-        <label>Description:</label><br>
-        <textarea name="task_description" rows="4"
-            cols="50"><?php echo htmlspecialchars($task['task_description']); ?></textarea><br><br>
+                    <div style="display: flex; gap: 20px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Status</label>
+                            <select name="task_status" required>
+                                <option value="not_started" <?php if ($task['task_status'] == 'not_started')
+                                    echo 'selected'; ?>>Not Started</option>
+                                <option value="in_progress" <?php if ($task['task_status'] == 'in_progress')
+                                    echo 'selected'; ?>>In Progress</option>
+                                <option value="completed" <?php if ($task['task_status'] == 'completed')
+                                    echo 'selected'; ?>>Completed</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Due Date</label>
+                            <input type="date" name="due_date"
+                                value="<?php echo htmlspecialchars($task['due_date']); ?>" required>
+                        </div>
+                    </div>
 
-        <button type="submit">Update Task</button>
-    </form>
-    <br>
-    <?php
-    $dashboard_url = ($_SESSION['user_type'] == 'faculty') ? '/research_management/public/dashboard_faculty.php' : '/research_management/public/dashboard.php';
-    ?>
-    <a href="<?php echo $dashboard_url; ?>">Back to Dashboard</a>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea name="task_description" rows="4"
+                            required><?php echo htmlspecialchars($task['task_description']); ?></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-submit">Update Task</button>
+                    <?php
+                    $dashboard_url = ($_SESSION['user_type'] == 'faculty') ? '/research_management/public/dashboard_faculty.php' : '/research_management/public/dashboard.php';
+                    ?>
+                    <a href="<?php echo $dashboard_url; ?>"
+                        style="margin-left: 15px; color: #6b7280; text-decoration: none;">Cancel</a>
+                </form>
+            </div>
+        </main>
+    </div>
 </body>
 
 </html>

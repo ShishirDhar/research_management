@@ -50,6 +50,15 @@ if ($user_type == 'faculty') {
                     Projects
                 </a>
             </li>
+            <?php if ($user_type != 'student'): ?>
+                <li>
+                    <a href="/research_management/modules/funding/list.php"
+                        class="<?php echo (strpos($_SERVER['REQUEST_URI'], 'funding') !== false) ? 'active' : ''; ?>">
+                        Funding
+                    </a>
+                </li>
+            <?php endif; ?>
+
             <li>
                 <a href="/research_management/modules/publications/list.php"
                     class="<?php echo (strpos($_SERVER['REQUEST_URI'], 'publications') !== false) ? 'active' : ''; ?>">

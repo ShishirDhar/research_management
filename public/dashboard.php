@@ -14,10 +14,7 @@ $total_publications_query = "SELECT COUNT(*) as d FROM publication";
 $total_publications_result = $conn->query($total_publications_query);
 $total_publications = $total_publications_result->fetch_assoc()['d'];
 
-// Query for total funding left (amount_left)
-$total_funding_left_query = "SELECT SUM(amount_left) as s FROM funding";
-$total_funding_left_result = $conn->query($total_funding_left_query);
-$total_funding_left = $total_funding_left_result->fetch_assoc()['s'];
+// Query for total funding left (amount_left) REMOVED as per user request
 ?>
 
 <!DOCTYPE html>
@@ -51,10 +48,6 @@ $total_funding_left = $total_funding_left_result->fetch_assoc()['s'];
                 <div class="stat-card purple">
                     <h3>Publications</h3>
                     <div class="value"><?php echo $total_publications; ?></div>
-                </div>
-                <div class="stat-card green">
-                    <h3>Total Funding</h3>
-                    <div class="value">৳<?php echo number_format($total_funding_left); ?></div>
                 </div>
             </div>
 

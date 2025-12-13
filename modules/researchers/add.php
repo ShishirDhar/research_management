@@ -55,12 +55,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Insert into specific type table
+        // Insert into specific type table
         if ($type == 'student') {
             $degree_program = $_POST['degree_program'];
             $year_level = $_POST['year_level'];
+            $cgpa = $_POST['cgpa'];
 
-            $stmt_student = $conn->prepare("INSERT INTO student (researcher_id, degree_program, year_level) VALUES (?, ?, ?)");
-            $stmt_student->bind_param("sss", $researcher_id, $degree_program, $year_level);
+            $stmt_student = $conn->prepare("INSERT INTO student (researcher_id, degree_program, year_level, cgpa) VALUES (?, ?, ?, ?)");
+            $stmt_student->bind_param("sssd", $researcher_id, $degree_program, $year_level, $cgpa);
 
             if (!$stmt_student->execute()) {
                 throw new Exception("Error inserting student details: " . $stmt_student->error);
@@ -68,9 +70,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else if ($type == 'faculty') {
             $experience = $_POST['experience'];
             $initials = $_POST['initials'];
+            $designation = $_POST['designation'];
 
-            $stmt_faculty = $conn->prepare("INSERT INTO faculty (researcher_id, experience, initials) VALUES (?, ?, ?)");
-            $stmt_faculty->bind_param("sis", $researcher_id, $experience, $initials);
+            $stmt_faculty = $conn->prepare("INSERT INTO faculty (researcher_id, experience, initials, designation) VALUES (?, ?, ?, ?)");
+            $stmt_faculty->bind_param("siss", $researcher_id, $experience, $initials, $designation);
 
             if (!$stmt_faculty->execute()) {
                 throw new Exception("Error inserting faculty details: " . $stmt_faculty->error);
@@ -124,13 +127,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 facultyFields.style.display = 'none';
                 document.getElementById('degree_program').required = true;
                 document.getElementById('year_level').required = true;
+                document.getElementById('cgpa').required = true;
                 document.getElementById('experience').required = false;
+                document.getElementById('designation').required = false;
             } else {
                 studentFields.style.display = 'none';
                 facultyFields.style.display = 'block';
                 document.getElementById('degree_program').required = false;
                 document.getElementById('year_level').required = false;
+                document.getElementById('cgpa').required = false;
                 document.getElementById('experience').required = true;
+                document.getElementById('designation').required = true;
             }
         }
     </script>
@@ -204,9 +211,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <label>Year Level</label>
                             <input type="text" name="year_level" id="year_level" required>
                         </div>
+                        <div class="form-group">
+                            <label>CGPA</label>
+                            <input type="number" name="cgpa" id="cgpa" step="0.01" min="0" max="4"
+                                placeholder="0.00 - 4.00" required>
+                        </div>
                     </div>
 
                     <div id="faculty_fields" style="display:none;">
+                        <div class="form-group">
+                            <label>Designation</label>
+                            <input type="text" name="designation" id="designation">
+                        </div>
                         <div class="form-group">
                             <label>Experience (Years)</label>
                             <input type="number" name="experience" id="experience">
