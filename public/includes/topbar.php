@@ -57,6 +57,12 @@ if ($user_type == 'faculty') {
                         Funding
                     </a>
                 </li>
+                <li>
+                    <a href="/research_management/modules/reports/index.php"
+                        class="<?php echo (strpos($_SERVER['REQUEST_URI'], 'reports') !== false) ? 'active' : ''; ?>">
+                        Reports
+                    </a>
+                </li>
             <?php endif; ?>
 
             <li>
