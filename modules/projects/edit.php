@@ -63,6 +63,21 @@ if ($project['status'] == 'published') {
     }
 }
 
+// Fetch Existing Collaboration
+$collab_query = "
+    SELECT c.* 
+    FROM collaboration c
+    JOIN project_collaboration pc ON c.collaboration_id = pc.collaboration_id
+    WHERE pc.project_id = ?
+";
+$stmt_col = $conn->prepare($collab_query);
+$stmt_col->bind_param("s", $id);
+$stmt_col->execute();
+$res_col = $stmt_col->get_result();
+$existing_collab = $res_col->fetch_assoc();
+$has_collab = $existing_collab ? true : false;
+$collab_id = $existing_collab['collaboration_id'] ?? null;
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $project_title = $_POST['project_title'];
     $project_lead = $_POST['project_lead'];
@@ -179,6 +194,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             throw new Exception("Error adding team member: " . $stmt_ins->error);
                         }
                     }
+                }
+            }
+
+            // Handle Collaboration Update
+            $is_collab_checked = isset($_POST['has_collaboration']) && $_POST['has_collaboration'] == '1';
+
+            if ($is_collab_checked) {
+                // Prepare values
+                $col_type = $_POST['collaboration_type'];
+                $country = $_POST['country'];
+                $mou_date = !empty($_POST['mou_agreement_date']) ? $_POST['mou_agreement_date'] : null;
+                $mou_details = !empty($_POST['mou_agreement_details']) ? $_POST['mou_agreement_details'] : null;
+
+                if ($collab_id) {
+                    // Update Existing
+                    $stmt_upd_col = $conn->prepare("UPDATE collaboration SET collaboration_type=?, country=?, mou_agreement_date=?, mou_agreement_details=? WHERE collaboration_id=?");
+                    $stmt_upd_col->bind_param("sssss", $col_type, $country, $mou_date, $mou_details, $collab_id);
+                    if (!$stmt_upd_col->execute()) {
+                         throw new Exception("Error updating collaboration: " . $stmt_upd_col->error);
+                    }
+                } else {
+                    // Create New
+                    $new_col_id = 'col_' . uniqid();
+                    $stmt_new_col = $conn->prepare("INSERT INTO collaboration (collaboration_id, collaboration_type, country, mou_agreement_date, mou_agreement_details) VALUES (?, ?, ?, ?, ?)");
+                    $stmt_new_col->bind_param("sssss", $new_col_id, $col_type, $country, $mou_date, $mou_details);
+                    if (!$stmt_new_col->execute()) {
+                        throw new Exception("Error adding collaboration: " . $stmt_new_col->error);
+                    }
+
+                    // Link to Project
+                    $stmt_link = $conn->prepare("INSERT INTO project_collaboration (project_id, collaboration_id) VALUES (?, ?)");
+                    $stmt_link->bind_param("ss", $id, $new_col_id);
+                    if (!$stmt_link->execute()) {
+                        throw new Exception("Error linking collaboration: " . $stmt_link->error);
+                    }
+                }
+            } else {
+                // If unchecked, check if we need to remove existing
+                if ($collab_id) {
+                    // Delete Link
+                    $stmt_del_link = $conn->prepare("DELETE FROM project_collaboration WHERE project_id = ?");
+                    $stmt_del_link->bind_param("s", $id);
+                    $stmt_del_link->execute();
+
+                    // Optional: Delete the collaboration record if it's orphan?
+                    // Assuming 1:1 for simplicity based on uniqid generation in add/edit
+                    $stmt_del_col = $conn->prepare("DELETE FROM collaboration WHERE collaboration_id = ?");
+                    $stmt_del_col->bind_param("s", $collab_id);
+                    $stmt_del_col->execute();
                 }
             }
 
@@ -324,6 +388,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <input type="date" name="end_date" value="<?php echo htmlspecialchars($project['end_date']); ?>" required>
                         </div>
                     </div>
+
+                    <div style="margin: 30px 0; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                        <div class="form-group" style="margin-bottom: 20px;">
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 1rem; color: #374151;">
+                                <input type="checkbox" name="has_collaboration" id="has_collaboration" value="1" onchange="toggleCollaboration()" style="width: 18px; height: 18px;" <?php echo $has_collab ? 'checked' : ''; ?>>
+                                Is there a collaboration?
+                            </label>
+                        </div>
+
+                        <div id="collaboration_details" style="display: <?php echo $has_collab ? 'block' : 'none'; ?>; background: #f9fafb; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                            <h4 style="margin-top: 0; margin-bottom: 15px; color: #4b5563;">Collaboration Details</h4>
+                            
+                            <div class="form-group">
+                                <label>Collaboration Type</label>
+                                <select name="collaboration_type" id="collaboration_type" <?php echo $has_collab ? 'required' : ''; ?>>
+                                    <option value="">Select Type</option>
+                                    <option value="interdepartmental" <?php if (($existing_collab['collaboration_type'] ?? '') == 'interdepartmental') echo 'selected'; ?>>Interdepartmental</option>
+                                    <option value="inter-university" <?php if (($existing_collab['collaboration_type'] ?? '') == 'inter-university') echo 'selected'; ?>>Inter-university</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Country</label>
+                                <input type="text" name="country" id="country" placeholder="e.g. USA, UK, India" value="<?php echo htmlspecialchars($existing_collab['country'] ?? ''); ?>" <?php echo $has_collab ? 'required' : ''; ?>>
+                            </div>
+
+                            <div class="form-group">
+                                <label>MoU Agreement Date (If any)</label>
+                                <input type="date" name="mou_agreement_date" value="<?php echo htmlspecialchars($existing_collab['mou_agreement_date'] ?? ''); ?>">
+                            </div>
+
+                            <div class="form-group">
+                                <label>MoU Agreement Details (If any)</label>
+                                <textarea name="mou_agreement_details" rows="3" placeholder="Enter details..."><?php echo htmlspecialchars($existing_collab['mou_agreement_details'] ?? ''); ?></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <script>
+                        function toggleCollaboration() {
+                            const checkbox = document.getElementById('has_collaboration');
+                            const details = document.getElementById('collaboration_details');
+                            const type = document.getElementById('collaboration_type');
+                            const country = document.getElementById('country');
+
+                            if (checkbox.checked) {
+                                details.style.display = 'block';
+                                type.required = true;
+                                country.required = true;
+                            } else {
+                                details.style.display = 'none';
+                                type.required = false;
+                                country.required = false;
+                            }
+                        }
+                    </script>
 
                     <div style="margin: 30px 0; padding-top: 20px; border-top: 1px solid #e5e7eb;">
                         <h3 style="font-size: 1.1rem; color: #374151; margin-bottom: 15px;">Team Members</h3>

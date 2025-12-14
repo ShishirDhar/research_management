@@ -102,6 +102,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
+            // Handle Collaboration
+            if (isset($_POST['has_collaboration']) && $_POST['has_collaboration'] == '1') {
+                $col_type = $_POST['collaboration_type'];
+                $country = $_POST['country'];
+                $mou_date = !empty($_POST['mou_agreement_date']) ? $_POST['mou_agreement_date'] : null;
+                $mou_details = !empty($_POST['mou_agreement_details']) ? $_POST['mou_agreement_details'] : null;
+
+                // Generate Collaboration ID
+                $col_id = 'col_' . uniqid();
+
+                // Insert into Collaboration
+                $stmt_col = $conn->prepare("INSERT INTO collaboration (collaboration_id, collaboration_type, country, mou_agreement_date, mou_agreement_details) VALUES (?, ?, ?, ?, ?)");
+                $stmt_col->bind_param("sssss", $col_id, $col_type, $country, $mou_date, $mou_details);
+
+                if (!$stmt_col->execute()) {
+                    throw new Exception("Error adding collaboration: " . $stmt_col->error);
+                }
+
+                // Insert into Project_Collaboration
+                $stmt_pc = $conn->prepare("INSERT INTO project_collaboration (project_id, collaboration_id) VALUES (?, ?)");
+                $stmt_pc->bind_param("ss", $project_id, $col_id);
+
+                if (!$stmt_pc->execute()) {
+                    throw new Exception("Error linking collaboration: " . $stmt_pc->error);
+                }
+            }
+
             $conn->commit();
             $success = "Project added successfully!";
 
@@ -233,6 +260,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 typeContainer.style.display = 'none';
                                 typeSelect.required = false;
                                 typeSelect.value = '';
+                            }
+                        }
+                    </script>
+
+                    <div style="margin: 30px 0; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                        <div class="form-group" style="margin-bottom: 20px;">
+                            <label
+                                style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 1rem; color: #374151;">
+                                <input type="checkbox" name="has_collaboration" id="has_collaboration" value="1"
+                                    onchange="toggleCollaboration()" style="width: 18px; height: 18px;">
+                                Is there a collaboration?
+                            </label>
+                        </div>
+
+                        <div id="collaboration_details"
+                            style="display: none; background: #f9fafb; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                            <h4 style="margin-top: 0; margin-bottom: 15px; color: #4b5563;">Collaboration Details</h4>
+
+                            <div class="form-group">
+                                <label>Collaboration Type</label>
+                                <select name="collaboration_type" id="collaboration_type">
+                                    <option value="">Select Type</option>
+                                    <option value="interdepartmental">Interdepartmental</option>
+                                    <option value="inter-university">Inter-university</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Country</label>
+                                <input type="text" name="country" id="country" placeholder="e.g. USA, UK, India">
+                            </div>
+
+                            <div class="form-group">
+                                <label>MoU Agreement Date (If any)</label>
+                                <input type="date" name="mou_agreement_date">
+                            </div>
+
+                            <div class="form-group">
+                                <label>MoU Agreement Details (If any)</label>
+                                <textarea name="mou_agreement_details" rows="3"
+                                    placeholder="Enter details..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <script>
+                        function toggleCollaboration() {
+                            const checkbox = document.getElementById('has_collaboration');
+                            const details = document.getElementById('collaboration_details');
+                            const type = document.getElementById('collaboration_type');
+                            const country = document.getElementById('country');
+
+                            if (checkbox.checked) {
+                                details.style.display = 'block';
+                                type.required = true;
+                                country.required = true;
+                            } else {
+                                details.style.display = 'none';
+                                type.required = false;
+                                country.required = false;
                             }
                         }
                     </script>
