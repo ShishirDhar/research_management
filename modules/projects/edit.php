@@ -88,6 +88,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $pub_type = $_POST['publication_type'] ?? 'paper';
                 $pub_id = 'pub_' . $id;
 
+                // Handle File Upload
+                if (isset($_FILES['publication_file']) && $_FILES['publication_file']['error'] == 0) {
+                    $file = $_FILES['publication_file'];
+                    
+                    // Validate PDF type
+                    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                    $mime = finfo_file($finfo, $file['tmp_name']);
+                    finfo_close($finfo);
+                    
+                    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+
+                    if ($mime !== 'application/pdf' || $ext !== 'pdf') {
+                         throw new Exception("Only PDF files are allowed.");
+                    }
+
+                    // Directory: Root/uploads/publications
+                    $upload_dir = __DIR__ . '/../../uploads/publications/';
+                    
+                    if (!is_dir($upload_dir)) {
+                        if (!mkdir($upload_dir, 0777, true)) {
+                             throw new Exception("Failed to create upload directory.");
+                        }
+                    }
+                    
+                    $filename = $pub_id . ".pdf";
+                    $destination = $upload_dir . $filename;
+
+                    if (!move_uploaded_file($file['tmp_name'], $destination)) {
+                         throw new Exception("Failed to upload file. Check permissions.");
+                    }
+                }
+
                 // Check if publication exists 
                 $check_pub = $conn->prepare("SELECT publication_id FROM publication WHERE project_id = ?");
                 $check_pub->bind_param("s", $id);
@@ -111,12 +143,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $department = $dept_row['department'] ?? 'Unassigned';
 
                     $citations = rand(1, 50);
-                    $stmt_ins_pub = $conn->prepare("INSERT INTO publication (publication_id, project_id, title, publication_date, department, citation_count, type, file_path) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')");
+                    // Insert without file_path column
+                    $stmt_ins_pub = $conn->prepare("INSERT INTO publication (publication_id, project_id, title, publication_date, department, citation_count, type) VALUES (?, ?, ?, ?, ?, ?, ?)");
                     $stmt_ins_pub->bind_param("sssssis", $pub_id, $id, $project_title, $end_date, $department, $citations, $pub_type);
                     $stmt_ins_pub->execute();
                 }
             } else {
                 // If status is NOT published (e.g. reverted to ongoing), remove from publication table
+                // Optional: Delete file? Keeping it safe for now.
                 $stmt_del_pub = $conn->prepare("DELETE FROM publication WHERE project_id = ?");
                 $stmt_del_pub->bind_param("s", $id);
                 $stmt_del_pub->execute();
@@ -218,7 +252,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 echo "<div class='success-message' style='color: #065f46; background: #d1fae5; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #a7f3d0;'>$success</div>"; ?>
 
             <div class="form-container">
-                <form action="edit.php?id=<?php echo $id; ?>" method="POST" class="modern-form">
+                <form action="edit.php?id=<?php echo $id; ?>" method="POST" class="modern-form" enctype="multipart/form-data">
                     <div class="form-group">
                         <label>Project Title</label>
                         <input type="text" name="project_title" value="<?php echo htmlspecialchars($project['project_title']); ?>" required>
@@ -255,6 +289,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <option value="journal" <?php if ($current_pub_type == 'journal') echo 'selected'; ?>>Journal</option>
                             <option value="conference" <?php if ($current_pub_type == 'conference') echo 'selected'; ?>>Conference</option>
                         </select>
+                        
+                        <div style="margin-top: 15px;">
+                            <label>Upload Publication PDF</label>
+                            <input type="file" name="publication_file" id="publication_file" accept=".pdf" style="padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; width: 100%;">
+                            <small style="color: #6b7280; display: block; margin-top: 4px;">Only PDF files allowed. Will be saved as <?php echo 'pub_' . $id; ?>.pdf</small>
+                        </div>
                     </div>
 
                     <script>

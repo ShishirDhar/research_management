@@ -10,21 +10,55 @@ if ($_SESSION['user_type'] == 'student') {
     exit();
 }
 
-// Fetch all funding records with aggregated project titles
-$query = "
-    SELECT 
-        f.funding_id, 
-        f.agency_name, 
-        f.total_grant,
-        GROUP_CONCAT(p.project_title SEPARATOR ', ') as linked_projects
-    FROM funding f
-    LEFT JOIN project_funding pf ON f.funding_id = pf.funding_id
-    LEFT JOIN project p ON pf.project_id = p.project_id
-    GROUP BY f.funding_id
-    ORDER BY f.agency_name ASC
-";
+// Access Control: Admin and Faculty (already checked)
+$uid = $_SESSION['uid'] ?? null;
+$user_type = $_SESSION['user_type'];
 
-$result = $conn->query($query);
+if ($user_type == 'admin') {
+    // Admin sees all
+    $query = "
+        SELECT 
+            f.funding_id, 
+            f.agency_name, 
+            f.total_grant,
+            GROUP_CONCAT(p.project_title SEPARATOR ', ') as linked_projects
+        FROM funding f
+        LEFT JOIN project_funding pf ON f.funding_id = pf.funding_id
+        LEFT JOIN project p ON pf.project_id = p.project_id
+        GROUP BY f.funding_id
+        ORDER BY f.agency_name ASC
+    ";
+    $stmt = $conn->prepare($query);
+} else {
+    // Faculty sees only funding linked to their projects
+    // Logic: Select funding from project_funding where project_id IN (projects of user)
+    // Note: A funding might be linked to Project A (User's) and Project B (Not User's).
+    // Should they see Project B in the "linked_projects" list?
+    // Probably yes, if they can see the funding, they see the whole record.
+    // BUT the prompt says "manage the funding of projects they are involved in".
+    // Let's first filter the rows: they only see rows where at least one linked project is theirs.
+
+    $query = "
+        SELECT 
+            f.funding_id, 
+            f.agency_name, 
+            f.total_grant,
+            GROUP_CONCAT(p.project_title SEPARATOR ', ') as linked_projects
+        FROM funding f
+        JOIN project_funding pf_filter ON f.funding_id = pf_filter.funding_id
+        JOIN researcher_project rp ON pf_filter.project_id = rp.project_id
+        LEFT JOIN project_funding pf ON f.funding_id = pf.funding_id
+        LEFT JOIN project p ON pf.project_id = p.project_id
+        WHERE rp.researcher_id = ?
+        GROUP BY f.funding_id
+        ORDER BY f.agency_name ASC
+    ";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("s", $uid);
+}
+
+$stmt->execute();
+$result = $stmt->get_result();
 ?>
 
 <!DOCTYPE html>

@@ -16,6 +16,24 @@ if (!$id) {
     exit();
 }
 
+// Access Check for Faculty
+if ($_SESSION['user_type'] == 'faculty') {
+    $uid = $_SESSION['uid'];
+    $check_access = "
+        SELECT 1 
+        FROM project_funding pf
+        JOIN researcher_project rp ON pf.project_id = rp.project_id
+        WHERE pf.funding_id = ? AND rp.researcher_id = ?
+        LIMIT 1
+    ";
+    $stmt_acc = $conn->prepare($check_access);
+    $stmt_acc->bind_param("ss", $id, $uid);
+    $stmt_acc->execute();
+    if ($stmt_acc->get_result()->num_rows === 0) {
+        die("Access denied: You are not involved in any project linked to this funding.");
+    }
+}
+
 $error = '';
 $success = '';
 

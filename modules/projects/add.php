@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Use project_id as publication_id or derived one. The schema requires publication_id.
                 // Assuming end_date as publication date
                 $citations = rand(1, 50);
-                $stmt_pub = $conn->prepare("INSERT INTO publication (publication_id, project_id, title, publication_date, department, citation_count, type, file_path) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')");
+                $stmt_pub = $conn->prepare("INSERT INTO publication (publication_id, project_id, title, publication_date, department, citation_count, type) VALUES (?, ?, ?, ?, ?, ?, ?)");
                 $stmt_pub->bind_param("sssssis", $pub_id, $project_id, $project_title, $end_date, $department, $citations, $pub_type);
 
                 if (!$stmt_pub->execute()) {
